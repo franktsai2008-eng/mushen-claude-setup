@@ -1,0 +1,73 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Read(*)",
+      "WebFetch(*)",
+      "WebSearch",
+      "Skill(*)",
+      "mcp__playwright__*",
+      "mcp__claude_ai_Supabase__*",
+      "mcp__claude_ai_Vercel__*",
+      "mcp__firecrawl__*",
+      "mcp__github__*",
+      "mcp__claude_ai_Google_Drive__*",
+      "mcp__claude_ai_Gmail__*",
+      "mcp__magic__*",
+      "mcp__claude_ai_Context7__*",
+      "mcp__plugin_claude-mem_mcp-search__*",
+      "mcp__gitnexus__*",
+      "mcp__pinecone__*"
+    ],
+    "deny": [
+      "Read(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.config/gh/**)",
+      "Read(~/.gnupg/**)",
+      "Read(~/Library/Keychains/**)",
+      "Edit(~/.bashrc)",
+      "Edit(~/.zshrc)",
+      "Edit(~/.bash_profile)",
+      "Edit(~/.ssh/**)"
+    ],
+    "defaultMode": "auto"
+  },
+  "hooks": {
+    "SessionStart": [{"matcher": "", "hooks": [{"type": "command", "command": "printf '\\033[95m🐦 AgentCrow active\\033[0m\\n' >&2"}]}],
+    "PreToolUse": [
+      {"matcher": "Agent", "hooks": [{"type": "command", "command": "$HOME/.claude/hooks/agentcrow-inject.sh"}]},
+      {"matcher": "Bash", "hooks": [{"type": "command", "command": "bash $HOME/.claude/hooks/guard-dangerous-commands.sh", "timeout": 5000}]}
+    ],
+    "PostToolUse": [{"matcher": "Write|Edit|MultiEdit", "hooks": [
+      {"type": "command", "command": "if [ -f ./tsconfig.json ]; then npx tsc --noEmit --pretty 2>&1 | head -30; fi", "timeout": 30000},
+      {"type": "command", "command": "bash $HOME/.claude/hooks/auto-format.sh", "timeout": 10000}
+    ]}],
+    "Stop": [{"matcher": "", "hooks": [{"type": "command", "command": "bash $HOME/.claude/hooks/notify-done.sh", "timeout": 5000}]}],
+    "PostCompact": [{"matcher": "", "hooks": [{"type": "command", "command": "bash $HOME/.claude/hooks/post-compact-inject.sh", "timeout": 10000}]}],
+    "UserPromptSubmit": [{"matcher": "", "hooks": [{"type": "command", "command": "bash $HOME/.claude/hooks/auto-recall.sh", "timeout": 3000}]}]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); dir=$(echo \"$input\" | jq -r '.workspace.current_dir // empty'); branch=$(cd \"$dir\" 2>/dev/null && git branch --show-current 2>/dev/null || echo '-'); printf '%s [%s]' \"$(basename \"$dir\")\" \"$branch\""
+  },
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true,
+    "frontend-design@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "claude-mem@thedotmack": true,
+    "warp@claude-code-warp": true,
+    "vercel@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {"source": {"source": "github", "repo": "anthropics/claude-plugins-official"}},
+    "superpowers-marketplace": {"source": {"source": "github", "repo": "obra/superpowers-marketplace"}},
+    "thedotmack": {"source": {"source": "github", "repo": "thedotmack/claude-mem"}},
+    "claude-code-warp": {"source": {"source": "github", "repo": "warpdotdev/claude-code-warp"}}
+  },
+  "effortLevel": "xhigh",
+  "autoMemoryEnabled": true,
+  "theme": "auto",
+  "skipAutoPermissionPrompt": true
+}

@@ -1,0 +1,36 @@
+# auto-recall keywords — one per line
+# Used by ~/.claude/hooks/auto-recall.sh on UserPromptSubmit.
+#
+# 中文觸發詞
+上次
+之前
+還記得
+記得嗎
+昨天
+前天
+我們之前
+那個
+之前討論
+之前做的
+上週
+上個月
+原本
+本來
+之前說過
+
+# English triggers
+last time
+previously
+remember
+recall
+yesterday
+earlier
+we discussed
+we built
+we decided
+the one we
+back then
+last week
+last month
+before we
+prior session
