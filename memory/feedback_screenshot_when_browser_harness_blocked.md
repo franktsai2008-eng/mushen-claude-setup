@@ -1,9 +1,9 @@
 ---
 name: Screenshot fallback when browser-harness can't connect
-description: When browser-harness needs Chrome remote-debug enabled (it isn't), don't try to enable it — fall back to headless playwright via a tiny node script.
+description: When browser-harness needs Chrome remote-debug enabled (it isn't), fall back to headless playwright via a tiny node script.
 type: feedback
 ---
-`browser-harness` is the default for design iteration screenshots, but it requires user's Chrome to have remote debugging enabled. On a remote Linux server they likely don't have a desktop Chrome at all. Don't ask them to enable it — fall back to playwright headless.
+`browser-harness` requires Chrome to have remote debugging enabled. On a remote Linux server there may be no desktop Chrome at all. Don't ask the user to enable it — fall back to playwright headless.
 
 **How to apply:**
 
@@ -23,8 +23,8 @@ const fullPage = process.argv[4] === "full";
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 const page = await ctx.newPage();
-await page.goto(url, { waitUntil: "domcontentloaded" });
-await page.waitForTimeout(3500);
+await page.goto(url, { waitUntil: "domcontentloaded" });   // NOT "networkidle" — Clerk polls forever
+await page.waitForTimeout(3500);                            // give Clerk + framer-motion time to settle
 await page.screenshot({ path: out, fullPage });
 await browser.close();
 console.log("OK", out);
@@ -36,10 +36,7 @@ node /tmp/screenshot.mjs http://localhost:3000/preview /tmp/shot.png       # vie
 node /tmp/screenshot.mjs http://localhost:3000/preview /tmp/shot.png full  # full page
 ```
 
-5. **Then `Read /tmp/shot.png`** to view it inline.
-
 **Gotchas:**
-- `waitUntil: "networkidle"` never resolves on Clerk-protected pages. Use `domcontentloaded` + `waitForTimeout`.
-- For full-page screenshots, set `deviceScaleFactor: 1` to keep image dimensions modest.
-
-**Don't:** try `npx playwright install chromium --with-deps` without sudo. Plain `npx playwright install chromium` works without root.
+- `waitUntil: "networkidle"` never resolves on Clerk-protected pages. Use `domcontentloaded` + a 3–4s `waitForTimeout`.
+- Playwright MCP may not find Chrome at `/opt/google/chrome/chrome` — using a local chromium via the script above is simpler.
+- `npx playwright install chromium --with-deps` needs root. Plain `npx playwright install chromium` works without.

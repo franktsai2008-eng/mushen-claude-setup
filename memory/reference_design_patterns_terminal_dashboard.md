@@ -1,9 +1,9 @@
 ---
 name: Reusable design+code patterns for terminal-style dashboards
-description: Concrete code patterns — shooting-star chart animation, SectionFrame chrome, dev-only preview routes, mock-data-first flow.
+description: Concrete code patterns for Next.js + Tailwind v4 + shadcn — shooting-star chart animation, SectionFrame chrome, dev-only preview routes, mock-data-first flow.
 type: reference
 ---
-Code patterns proven on a creator OS dashboard. Drop-in usable for any Next.js + Tailwind v4 + shadcn project wanting the terminal/agentic-OS feel.
+Drop-in usable for any future Next.js + Tailwind v4 + shadcn project that wants a terminal/agentic-OS feel.
 
 **1. Shooting-star dot animating along a line chart**
 
@@ -36,15 +36,13 @@ function smoothPath(pts){ const d=[`M ${pts[0].x} ${pts[0].y}`]; for(let i=0;i<p
 
 **2. SectionFrame — global card chrome**
 
-One component absorbs all card patterns across the app. `[ LABEL · meta ]` bracket markers in the header give the terminal feel.
-
 ```tsx
 <SectionFrame label="追蹤趨勢" meta="Δ +127" actions={<Segmented .../>} bodyClassName="p-2">
   ...content
 </SectionFrame>
 ```
 
-Frame is `border border-border bg-card rounded-sm hover:border-primary/30`. Header is `font-mono text-[11px] tracking-[0.18em] uppercase`.
+The frame is `border border-border bg-card rounded-sm hover:border-primary/30`. Header is `font-mono text-[11px] tracking-[0.18em] uppercase`.
 
 **3. Dev-only `/preview/*` route for design iteration**
 
@@ -56,11 +54,16 @@ if (process.env.NODE_ENV !== "production") {
 }
 ```
 
-Mirror your `/` page tree under `/preview/`. Lets you screenshot without going through Clerk every time. Auto-disabled in prod.
+Mirror your `/` page tree under `/preview/` (just an import). Lets you screenshot without going through Clerk every time. Auto-disabled in prod.
 
 **4. Mock-data-first**
 
-Single file at `lib/mock-data.ts` exports every dataset the dashboard reads. Realistic curves via `Math.sin(seed) - floor` for deterministic noise. Component imports `import { followerSeries, kpis, scripts } from "@/lib/mock-data"`. Phase C swaps imports for fetch calls. Type stays the same.
+Single file at `lib/mock-data.ts` exports every dataset the dashboard reads. Realistic curves via `Math.sin(seed) - floor` for deterministic noise:
+```ts
+const seed = (n) => Math.sin(n * 12.9898) * 43758.5453;
+const rand = (n) => seed(n) - Math.floor(seed(n));
+```
+Component imports `import { followerSeries, kpis, scripts } from "@/lib/mock-data"`. Phase C swaps imports for fetch calls to backend.
 
 **5. Animated counter on KPI cards**
 
@@ -73,11 +76,10 @@ return <motion.span>{display}</motion.span>;
 
 **6. Stagger reveal**
 
-`transition={{ delay: 0.04 * index, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}` on each child. Feels alive without being slow.
+`transition={{ delay: 0.04 * index, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}` on each child. 0.04s is the sweet spot.
 
 **7. Tailwind v4 + shadcn dark-default tokens**
 
-In `globals.css`:
 ```css
 :root, .dark {
   --background: oklch(0.06 0 0);
@@ -91,5 +93,5 @@ Use `<html class="dark">` so `dark:` Tailwind variants still work.
 
 ```tsx
 import { dark } from "@clerk/themes";
-<ClerkProvider appearance={{ baseTheme: dark, variables: { colorPrimary: "oklch(0.68 0.18 42)", colorBackground: "oklch(0.10 0 0)", borderRadius: "2px" }}}>
+<ClerkProvider appearance={{ baseTheme: dark, variables: { colorPrimary: "oklch(0.68 0.18 42)", colorBackground: "oklch(0.10 0 0)", borderRadius: "2px" }, elements: { card: "border border-[oklch(0.22_0_0)] shadow-none", formButtonPrimary: "bg-[oklch(0.68_0.18_42)] hover:bg-[oklch(0.72_0.18_42)] text-black font-mono uppercase tracking-widest text-xs" } }}>
 ```
