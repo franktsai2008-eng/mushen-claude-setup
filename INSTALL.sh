@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Mushen Claude Code Setup — One-shot installer
+# Motion Claude Code Setup — One-shot installer
 #
-# 用法（Mushen 端 Claude Code 會跑這個）:
-#   1) git clone https://github.com/franktsai2008-eng/mushen-claude-setup ~/mushen-claude-setup
-#   2) bash ~/mushen-claude-setup/INSTALL.sh
+# 用法（Motion 端 Claude Code 會跑這個）:
+#   1) git clone https://github.com/franktsai2008-eng/mushen-claude-setup ~/motion-claude-setup
+#   2) bash ~/motion-claude-setup/INSTALL.sh
 #
 # 跑完後請 Claude Code 讀 AFTER-INSTALL.md，照著對話帶你過 API 設定。
 
@@ -64,7 +64,7 @@ MEM_COUNT="$(ls "$MEM_DIR/" 2>/dev/null | wc -l | tr -d ' ')"
 ok "Installed $MEM_COUNT memory files → $MEM_DIR"
 
 # 7. 標記 install 完成
-cat > "$HOME/.claude/.mushen-bundle-installed" <<EOF
+cat > "$HOME/.claude/.motion-bundle-installed" <<EOF
 installed_at: $TS
 bundle_path: $BUNDLE
 user: $USER_NAME

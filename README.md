@@ -1,19 +1,19 @@
-# Mushen Claude Code Setup
+# Motion Claude Code Setup
 
 Frank 整套 Claude Code 記憶系統 + skills 的乾淨副本，已清掉所有 Frank 個人/商業隱私資料。
 
 ---
 
-## 🚀 一行安裝（給 Mushen）
+## 🚀 一行安裝（給 Motion）
 
 **直接複製下面這段，貼給你的 Claude Code：**
 
 ```
 請照這個 repo 幫我安裝整套設定：
 
-1. git clone https://github.com/franktsai2008-eng/mushen-claude-setup ~/mushen-claude-setup
-2. bash ~/mushen-claude-setup/INSTALL.sh
-3. 跑完之後讀 ~/mushen-claude-setup/AFTER-INSTALL.md，照著裡面的腳本帶我完成剩下的設定（白話對話、一次一步、等我回應再進下一步）
+1. git clone https://github.com/franktsai2008-eng/mushen-claude-setup ~/motion-claude-setup
+2. bash ~/motion-claude-setup/INSTALL.sh
+3. 跑完之後讀 ~/motion-claude-setup/AFTER-INSTALL.md，照著裡面的腳本帶我完成剩下的設定（白話對話、一次一步、等我回應再進下一步）
 ```
 
 Claude Code 會自動：
@@ -53,7 +53,7 @@ Claude Code 會自動：
 
 ---
 
-## Mushen 收到後要做的事
+## Motion 收到後要做的事
 
 安裝完 Claude Code 後，把最上面那段「一行安裝」貼給他，剩下他會帶你過：
 
