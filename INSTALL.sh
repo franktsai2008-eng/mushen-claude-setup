@@ -45,9 +45,10 @@ ok "Installed CLAUDE.md / settings.json / auto-recall-keywords.txt / compaction-
 # 4. Hooks
 cp "$BUNDLE/hooks/"*.sh "$HOME/.claude/hooks/"
 chmod +x "$HOME/.claude/hooks/"*.sh
-ok "Installed 7 hooks (chmod +x done)"
+HOOK_COUNT="$(ls "$HOME/.claude/hooks/"*.sh 2>/dev/null | wc -l | tr -d ' ')"
+ok "Installed $HOOK_COUNT hooks (chmod +x done)"
 
-# 5. Agents
+# 5. Agents (subagents — including pinecone-curator for memory system)
 AGENT_COUNT=0
 if [ -d "$BUNDLE/agents" ] && [ -n "$(ls -A "$BUNDLE/agents" 2>/dev/null)" ]; then
   cp "$BUNDLE/agents/"*.md "$HOME/.claude/agents/" 2>/dev/null || true
@@ -58,12 +59,12 @@ else
 fi
 
 # 6. Skills (optional — not bundled in repo to keep clone fast)
-if [ -d "$BUNDLE/skills" ] && [ "$(ls -A "$BUNDLE/skills" 2>/dev/null)" ]; then
+SKILL_COUNT=0
+if [ -d "$BUNDLE/skills" ] && [ -n "$(ls -A "$BUNDLE/skills" 2>/dev/null)" ]; then
   cp -r "$BUNDLE/skills/"* "$HOME/.claude/skills/" 2>/dev/null || true
   SKILL_COUNT="$(ls "$HOME/.claude/skills/" 2>/dev/null | wc -l | tr -d ' ')"
   ok "Installed $SKILL_COUNT skills (from local bundle)"
 else
-  SKILL_COUNT=0
   warn "Skills not in this clone — they're optional and can be added later."
   warn "Ask Frank for the skills tarball if you want them, or install individually from their sources."
 fi
@@ -79,6 +80,7 @@ installed_at: $TS
 bundle_path: $BUNDLE
 user: $USER_NAME
 memory_dir: $MEM_DIR
+hooks_count: $HOOK_COUNT
 agents_count: $AGENT_COUNT
 skills_count: $SKILL_COUNT
 memory_count: $MEM_COUNT
