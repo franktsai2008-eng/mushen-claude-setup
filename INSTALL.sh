@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Motion Claude Code Setup — One-shot installer
+# Claude Code Setup — One-shot installer
 #
-# 用法（Motion 端 Claude Code 會跑這個）:
-#   1) git clone https://github.com/franktsai2008-eng/mushen-claude-setup ~/motion-claude-setup
-#   2) bash ~/motion-claude-setup/INSTALL.sh
+# 用法（Claude Code 端會跑這個）:
+#   1) git clone https://github.com/franktsai2008-eng/mushen-claude-setup ~/claude-setup
+#   2) bash ~/claude-setup/INSTALL.sh
 #
 # 跑完後請 Claude Code 讀 AFTER-INSTALL.md，照著對話帶你過 API 設定。
 
@@ -32,8 +32,8 @@ if [ -f "$HOME/.claude/CLAUDE.md" ] || [ -f "$HOME/.claude/settings.json" ]; the
 fi
 
 # 2. 建目錄
-mkdir -p "$HOME/.claude/hooks" "$HOME/.claude/skills" "$MEM_DIR"
-ok "Created ~/.claude/{hooks,skills} + $MEM_DIR"
+mkdir -p "$HOME/.claude/hooks" "$HOME/.claude/skills" "$HOME/.claude/agents" "$MEM_DIR"
+ok "Created ~/.claude/{hooks,skills,agents} + $MEM_DIR"
 
 # 3. 複製全域檔案
 cp "$BUNDLE/CLAUDE.md"               "$HOME/.claude/CLAUDE.md"
@@ -47,7 +47,17 @@ cp "$BUNDLE/hooks/"*.sh "$HOME/.claude/hooks/"
 chmod +x "$HOME/.claude/hooks/"*.sh
 ok "Installed 7 hooks (chmod +x done)"
 
-# 5. Skills (optional — not bundled in repo to keep clone fast)
+# 5. Agents
+AGENT_COUNT=0
+if [ -d "$BUNDLE/agents" ] && [ -n "$(ls -A "$BUNDLE/agents" 2>/dev/null)" ]; then
+  cp "$BUNDLE/agents/"*.md "$HOME/.claude/agents/" 2>/dev/null || true
+  AGENT_COUNT="$(ls "$HOME/.claude/agents/"*.md 2>/dev/null | wc -l | tr -d ' ')"
+  ok "Installed $AGENT_COUNT agents → ~/.claude/agents/"
+else
+  warn "No agents in bundle — pinecone-curator missing means auto-save/recall won't work."
+fi
+
+# 6. Skills (optional — not bundled in repo to keep clone fast)
 if [ -d "$BUNDLE/skills" ] && [ "$(ls -A "$BUNDLE/skills" 2>/dev/null)" ]; then
   cp -r "$BUNDLE/skills/"* "$HOME/.claude/skills/" 2>/dev/null || true
   SKILL_COUNT="$(ls "$HOME/.claude/skills/" 2>/dev/null | wc -l | tr -d ' ')"
@@ -58,17 +68,18 @@ else
   warn "Ask Frank for the skills tarball if you want them, or install individually from their sources."
 fi
 
-# 6. Memory (universal engineering lessons)
+# 7. Memory (universal engineering lessons)
 cp -r "$BUNDLE/memory/"* "$MEM_DIR/"
 MEM_COUNT="$(ls "$MEM_DIR/" 2>/dev/null | wc -l | tr -d ' ')"
 ok "Installed $MEM_COUNT memory files → $MEM_DIR"
 
-# 7. 標記 install 完成
-cat > "$HOME/.claude/.motion-bundle-installed" <<EOF
+# 8. 標記 install 完成
+cat > "$HOME/.claude/.bundle-installed" <<EOF
 installed_at: $TS
 bundle_path: $BUNDLE
 user: $USER_NAME
 memory_dir: $MEM_DIR
+agents_count: $AGENT_COUNT
 skills_count: $SKILL_COUNT
 memory_count: $MEM_COUNT
 EOF

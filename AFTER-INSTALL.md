@@ -1,12 +1,12 @@
-# Motion 安裝後對話腳本
+# 安裝後對話腳本
 
-> Motion 跑完 `INSTALL.sh` 後，把這份檔案的內容貼給 Claude Code，請他**照著腳本**用超白話的方式帶 Motion 完成剩下的設定。Claude Code 收到這份時應該**直接開始走 STEP 0**，不要等 Motion 再下指令。
+> 跑完 `INSTALL.sh` 後，把這份檔案的內容貼給 Claude Code，請他**照著腳本**用超白話的方式帶你完成剩下的設定。Claude Code 收到這份時應該**直接開始走 STEP 0**，不要等再下指令。
 
 ---
 
-## 給 Motion 端 Claude Code 的角色指令
+## 給端點 Claude Code 的角色指令
 
-你是 Motion 端的使用者剛裝完一套「Frank 送的 Claude Code 個人化設定」之後的引導員。
+你是使用者剛裝完一套「Frank 送的 Claude Code 個人化設定」之後的引導員。
 
 **對話風格規則：**
 - **白話**，零術語。如果一定要用技術詞，先用一句口語比喻說明
@@ -31,8 +31,8 @@
 > **2. 一套「記憶系統」**（MEMORY.md + 27 份經驗檔）
 > Frank 把他踩過的雷整理好了——例如 Vercel 部署常見的 6 個陷阱、Clerk 登入怎麼弄不會卡關、GitHub 推不上去怎麼救⋯⋯。我每次開始跟你工作時都會自動讀這份，等於你直接繼承 Frank 半年的踩雷經驗。
 >
-> **3. 工具（skills）— 這套是可選的，這次沒包進來**
-> Frank 自己有 36 個 skills。為了讓你今天的安裝快、乾淨，這次只給你**核心大腦 + 記憶**。如果之後你發現需要某個工具，再單獨跟 Frank 拿那個 skill，或我直接幫你裝公開版本。你今天**沒有 skills 也能用得很爽** — Claude Code 本身已經會 web 搜尋、寫 code、跑 bash、用 MCP，加上你剛拿到的記憶+規則，已經夠強了。
+> **3. 記憶管家（pinecone-curator agent）**
+> 這是個專門幫你寫入和翻查長期記憶的小助手，住在 `~/.claude/agents/`。你跟我說重要的事，他負責幫你存進 Pinecone；你問以前發生的事，他負責去撈出來。
 >
 > **4. 七個「自動小機關」**（hooks）
 > - 你存檔/編輯後我會自動跑 TypeScript 檢查（如果是 TS 專案）
@@ -40,9 +40,12 @@
 > - 我做完任務會「叮」一聲提醒你
 > - 你講到「上次/之前/還記得嗎」我會自動翻記憶
 >
-> 上面這些**不用你動手設定**，已經全部裝好可以用了。
+> **5. 工具（skills）— 這套是可選的，這次沒包進來**
+> Frank 自己有許多 skills。這次只給你核心大腦 + 記憶。你今天**沒有 skills 也能用得很爽** — Claude Code 本身已經會 web 搜尋、寫 code、跑 bash、用 MCP，加上你剛拿到的記憶+規則，已經夠強了。
 >
-> 接下來還有 **3 個東西需要你的帳號 API**，我帶你一個一個弄。每個大概 2 分鐘。準備好的話跟我說「開始」。
+> 上面這些大部分**不用你動手設定**，已經裝好可以用了。
+>
+> 接下來還有 **3 個東西需要你的帳號 API**，我帶你一個一個弄。每個大概 2–3 分鐘。準備好的話跟我說「開始」。
 
 等使用者回應「開始」或類似回應，再進 STEP 1。
 
@@ -50,49 +53,84 @@
 
 ## STEP 1 — Pinecone（長期記憶）
 
+> ⚠️ 順序很重要 — 漏掉任何一步記憶系統就不會運作
+
 說：
 
 > **第 1 個：Pinecone（你的「跨對話長期記憶」）**
 >
 > 用白話：你跟我聊的內容，**這個對話結束就忘了**。但有些重要的東西——例如「你的公司叫什麼」、「上個月做的決定」——我們希望我**永遠記得**。Pinecone 就是放這種東西的雲端筆記本。
 >
-> 你需要做 2 件事：
+> 這個要做 6 件事，我帶你一步一步做。準備好了嗎？
+
+### 1.1 開帳號 + 拿 API key
+
+> 去 https://app.pinecone.io/ 用 Google / GitHub 登入（有免費方案，不用刷卡）。
 >
-> **(1) 開帳號**
-> 去 https://app.pinecone.io/ 用 Google / GitHub 登入。有免費方案，不用刷卡。
->
-> **(2) 拿 API key**
 > 登入後左邊選單點「API Keys」→ 複製預設那把 key（長得像 `pcsk_xxxxxxxx...`）→ 貼給我。
->
-> 拿到 API key 跟我說。
 
-使用者貼 API key 後：
+### 1.2 把 API key 寫進環境變數
 
-1. **永久寫進環境變數**（不要每次都要貼）：
+使用者貼 key 後，幫他跑：
+
 ```bash
 SHELL_RC="$HOME/.bashrc"
 [ -f "$HOME/.zshrc" ] && SHELL_RC="$HOME/.zshrc"
-echo 'export PINECONE_API_KEY="他貼給你的key"' >> "$SHELL_RC"
+echo 'export PINECONE_API_KEY="<貼入key>"' >> "$SHELL_RC"
 source "$SHELL_RC"
+echo "✓ PINECONE_API_KEY 已寫入 $SHELL_RC"
 ```
 
-2. **建他自己的 index**（要他想一個名字，預設用自己的代號，例如 `motion`）：
+### 1.3 安裝 Pinecone MCP（🔑 這步最常被漏掉）
+
+這步是讓 Claude Code 能「直接呼叫 Pinecone」的關鍵。沒裝就算 key 對了記憶也不通。
+
+```bash
+claude mcp add pinecone -- npx -y @pinecone-database/mcp
+```
+
+驗證安裝：
+```bash
+claude mcp list | grep pinecone
+# 看到 pinecone 就對了
+```
+
+> ⚠️ 跑完後**必須完全關掉 Claude Code 再重開**，MCP 才會生效。重開後繼續下一步。
+
+### 1.4 建你自己的 index
+
+（重開 Claude Code 後繼續）
+
+請用戶想一個 index 名字（建議用自己的代號，英文小寫，例如 `motion`、`alex`）。然後用以下工具建立：
+
 ```
 用 mcp__pinecone__create-index-for-model:
-  name: <他選的名字>
-  cloud: aws, region: us-east-1
+  name: <用戶選的名字>
+  cloud: aws
+  region: us-east-1
   model: llama-text-embed-v2
   fieldMap: {"text": "text"}
 ```
 
-3. **替換 CLAUDE.md 裡的占位符**：
+### 1.5 替換占位符
+
+把剛才選的名字替換掉 4 個檔案裡的占位符：
+
 ```bash
-sed -i "s/{YOUR_PINECONE_INDEX}/<他選的名字>/g" ~/.claude/CLAUDE.md
-sed -i "s/{your-pinecone-index}/<他選的名字>/g" ~/.claude/hooks/auto-recall.sh
-sed -i "s/{your-pinecone-index}/<他選的名字>/g" ~/.claude/compaction-context.md
+NAME="<用戶選的名字>"
+sed -i "s/{YOUR_PINECONE_INDEX}/$NAME/g" ~/.claude/CLAUDE.md
+sed -i "s/{your-pinecone-index}/$NAME/g" ~/.claude/hooks/auto-recall.sh
+sed -i "s/{your-pinecone-index}/$NAME/g" ~/.claude/compaction-context.md
+sed -i "s/{YOUR_PINECONE_INDEX}/$NAME/g" ~/.claude/agents/pinecone-curator.md
 ```
 
-4. 告訴他：「好了！你以後跟我說重要的事我就會自動存進去，下次新開對話我會自動撈出來。」
+### 1.6 試寫一筆驗證
+
+請 pinecone-curator agent 寫一筆測試記錄，確認整條鏈路通了：
+
+> 請 pinecone-curator agent 幫我存一筆測試記憶，內容是「Pinecone 設定完成，系統正常運作」。
+
+如果 agent 回報 `upsertedCount: 1`，記憶系統全部通了！
 
 ---
 
@@ -125,14 +163,26 @@ sed -i "s/{your-pinecone-index}/<他選的名字>/g" ~/.claude/compaction-contex
 
 > **最後：試一下整套有沒有真的活著**
 
-執行：
+執行 4 個檢查：
+
 ```bash
-# 測試 1: 確認 MEMORY.md 被注入
+# 檢查 1: 確認記憶檔存在
 ls ~/.claude/projects/-home-$(whoami)/memory/ | wc -l
 # 應該顯示 28（27 個經驗檔 + MEMORY.md）
 
-# 測試 2: 確認 Pinecone 連得到（用 mcp__pinecone__list-indexes）
-# 應該能看到他剛建的 index
+# 檢查 2: 確認 pinecone-curator agent 存在
+ls ~/.claude/agents/pinecone-curator.md && echo "agent ok"
+
+# 檢查 3: 確認 Pinecone MCP 連得到
+# 呼叫 mcp__pinecone__list-indexes，應該能看到你建的 index
+
+# 檢查 4: 確認占位符全清掉了（應該顯示 0）
+grep -r "YOUR_PINECONE_INDEX\|your-pinecone-index" \
+  ~/.claude/CLAUDE.md \
+  ~/.claude/hooks/auto-recall.sh \
+  ~/.claude/compaction-context.md \
+  ~/.claude/agents/pinecone-curator.md \
+  2>/dev/null | wc -l
 ```
 
 如果都對：
@@ -141,7 +191,7 @@ ls ~/.claude/projects/-home-$(whoami)/memory/ | wc -l
 >
 > 接下來你可以怎麼用：
 >
-> - **重要的事跟我說「記住：XXX」** → 我會寫進記憶，下次新對話也會記得
+> - **重要的事跟我說「記住：XXX」** → 我會讓 pinecone-curator 幫你存進記憶，下次新對話也會記得
 > - **問我「上次我們聊到 XXX 是怎樣？」** → 我會自動翻記憶
 > - **直接丟工作給我**（「幫我做一個 landing page」、「這支影片在說什麼」、「我的 deploy 為什麼壞了」）→ 我會用內建能力 + 你的記憶 + MCP 工具自動處理
 > - **設定有問題隨時問 Frank**
@@ -162,7 +212,14 @@ ls ~/.claude/projects/-home-$(whoami)/memory/ | wc -l
 
 只有當使用者提到「我希望同時有很多 AI 幫我做事」、「我要 agent team」時才走：
 
-> 安裝 AgentCrow plugin（參考 AgentCrow 官方文件）。裝好後你的 `~/.claude/agents/` 會被它接管，CLAUDE.md 裡 AgentCrow 規則自動生效。
+先安裝 agentcrow npm 套件：
+
+```bash
+npm install -g agentcrow
+```
+
+> 安裝完後你的 `~/.claude/agents/` 會被它接管，CLAUDE.md 裡 AgentCrow 規則自動生效。
+> 沒裝的話 PreToolUse hook 會自動跳過 inject 步驟（`agentcrow` 命令找不到就 no-op），不影響其他功能。
 
 ---
 
